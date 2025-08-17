@@ -9,7 +9,6 @@ const DCSchema = new mongoose.Schema({
     department: {
         type: String,
         required: true,
-        unique: true,
     }
 }, {
     timestamps: true,
