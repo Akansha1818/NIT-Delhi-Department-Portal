@@ -94,7 +94,7 @@ export default function AddAbout({ category }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#7f5af0] text-white py-3 rounded hover:bg-[#6e4be4]"
+                    className="w-full bg-[#212178] text-white py-3 rounded hover:bg-[#6e4be4]"
                 >
                     {loading ? 'Submitting...' : 'Submit Program'}
                 </button>

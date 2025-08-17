@@ -20,6 +20,6 @@ export default withAuth(
 
 export const config = {
     matcher: [
-        "/departmentportal/:path*"
+        // "/departmentportal/:path*"
     ],
 };

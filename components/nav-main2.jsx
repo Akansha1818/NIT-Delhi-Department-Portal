@@ -29,7 +29,7 @@ export function NavMain() {
     const navItems = [
         { title: "Dashboard", icon: LayoutDashboard, href: "/department_portal" },
         { title: "About Us", icon: BadgeHelp, href: "/department_portal/about" },
-        { title: "Faculty", icon: Users, href: "/department_portal/faculty" },
+        // { title: "Faculty", icon: Users, href: "/department_portal/faculty" },
         { title: "Staff", icon: Settings, href: "/department_portal/staff" },
         { title: "Research & Development", icon: Microscope, href: "/department_portal/RnD" },
         { title: "Programs", icon: BookOpen, href: "/department_portal/programs" },

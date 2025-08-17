@@ -31,7 +31,7 @@ export async function GET() {
 // ===========================
 function parseFormData(form) {
   const data = {
-    no_of_students: { boys: '', girls: '' },
+    no_of_students: { Male: '', Female: '' },
     no_of_seats: { josaa: '', csab: '', dasa: '' },
     scheme: []
   };
@@ -73,7 +73,7 @@ export async function POST(req) {
 
     if (
       !title || !category ||
-      !no_of_students?.boys || !no_of_students?.girls ||
+      !no_of_students?.Male || !no_of_students?.Female ||
       !no_of_seats?.josaa || !no_of_seats?.csab || !no_of_seats?.dasa ||
       !Array.isArray(scheme)
     ) {

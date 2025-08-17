@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import axios from "axios"
-import { Info, X, Upload, Trash2 } from "lucide-react"
+import { X, Upload, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { DndContext, closestCenter } from "@dnd-kit/core"
 import {
@@ -238,7 +238,7 @@ export default function BannerForm() {
 
     return (
         <div className="min-h-screen space-y-6">
-            <h2 className="text-3xl font-semibold text-[#212178]">Manage Banners</h2>
+            <h2 className="text-3xl font-bold text-[#212178]">Manage Banners</h2>
 
             {fetching ? (
                 <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -274,7 +274,7 @@ export default function BannerForm() {
                             {isOrderChanged() && (
                                 <button
                                     onClick={handleUpdateOrder}
-                                    className="mt-3 px-6 py-2 rounded bg-[#7f5af0] text-white"
+                                    className="mt-3 px-6 py-2 rounded bg-[#212178] text-white"
                                 >
                                     Save Order
                                 </button>
@@ -286,17 +286,8 @@ export default function BannerForm() {
 
             {/* Upload Section */}
             <div className="border-t pt-6">
-                <div className="flex items-center gap-2 mb-4">
-                    <h2 className="text-3xl font-semibold text-[#212178]">Add New Banners</h2>
-
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700" />
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                            <p>Recommended aspect ratio: <strong>3.3 / 1</strong> (approx.)</p>
-                        </TooltipContent>
-                    </Tooltip>
+                <div className="mb-4">
+                    <h2 className="text-3xl font-bold text-[#212178]">Add New Banners</h2>
                 </div>
 
                 <div className="border-2 border-dashed border-gray-300 p-6 rounded-md text-center bg-muted hover:bg-muted/50 transition">
@@ -316,8 +307,10 @@ export default function BannerForm() {
                         id="multi-upload"
                     />
                     <label htmlFor="multi-upload" className="cursor-pointer text-blue-600 hover:underline">
-                        Drag or choose files
+                        Drag or choose files 
                     </label>
+                    <br />
+                    <span className="text-sm font-normal text-gray-600">(567x1868px recommended)</span>
                     <p className="text-sm text-gray-500 mt-2">PNG, JPG, max 5MB each</p>
                 </div>
 
@@ -373,7 +366,7 @@ export default function BannerForm() {
                         <button
                             onClick={handleSubmit}
                             disabled={loading}
-                            className="flex w-45 justify-center items-center gap-2 px-6 py-2 bg-[#7f5af0] text-white rounded"
+                            className="flex w-45 justify-center items-center gap-2 px-6 py-2 bg-[#212178] text-white rounded"
                         >
                             <Upload />
                             {loading ? "Uploading..." : "Upload"}

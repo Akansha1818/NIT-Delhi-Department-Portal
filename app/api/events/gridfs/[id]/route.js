@@ -17,7 +17,7 @@ const getSessionAndModel = async () => {
 
 export async function GET(_req, { params }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, message: "Invalid or missing file ID" }, { status: 400 });
     }

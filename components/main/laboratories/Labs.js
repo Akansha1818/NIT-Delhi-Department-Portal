@@ -36,7 +36,7 @@ export default function LabsPage() {
                         <button
                             onClick={() => setMode("edit")}
                             className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition ${mode === "edit"
-                                    ? "bg-[#7f5af0] text-white"
+                                    ? "bg-[#212178] text-white"
                                     : "bg-white border border-gray-300 text-gray-700"
                                 }`}
                         >
@@ -45,7 +45,7 @@ export default function LabsPage() {
                         <button
                             onClick={() => setMode("add")}
                             className={`flex items-center gap-1 px-4 py-2 rounded-md text-sm font-medium transition ${mode === "add"
-                                    ? "bg-[#7f5af0] text-white"
+                                    ? "bg-[#212178] text-white"
                                     : "bg-white border border-gray-300 text-gray-700"
                                 }`}
                         >

@@ -20,10 +20,10 @@ import {
 
 // Map Tailwind class to HEX for charts
 const TAILWIND_TO_HEX = {
-  "bg-blue-500": "#3B82F6",
-  "bg-green-500": "#10B981",
-  "bg-purple-500": "#8B5CF6",
-  "bg-pink-500": "#EC4899",
+  "bg-blue-500": "#60A5FA", // soft blue
+  "bg-green-500": "#34D399", // soft green
+  "bg-purple-500": "#A78BFA", // soft purple
+  "bg-pink-500": "#F472B6", // soft pink
 };
 
 export default function Page() {
@@ -60,12 +60,14 @@ export default function Page() {
   useEffect(() => {
     const fetchCounts = async () => {
       try {
-        const [eventsRes, programsRes, labsRes, bannersRes] = await Promise.all([
-          fetch("/api/events/count"),
-          fetch("/api/programs/count"),
-          fetch("/api/labs/count"),
-          fetch("/api/banners/count"),
-        ]);
+        const [eventsRes, programsRes, labsRes, bannersRes] = await Promise.all(
+          [
+            fetch("/api/events/count"),
+            fetch("/api/programs/count"),
+            fetch("/api/labs/count"),
+            fetch("/api/banners/count"),
+          ]
+        );
 
         const [events, programs, labs, banners] = await Promise.all([
           eventsRes.json(),
@@ -111,19 +113,19 @@ export default function Page() {
           {loading
             ? [1, 2, 3, 4].map((i) => <SkeletonCard key={i} />)
             : chartData.map((item, index) => (
-              <DashboardCard
-                key={index}
-                title={item.name}
-                count={item.value}
-                color={item.color}
-              />
-            ))}
+                <DashboardCard
+                  key={index}
+                  title={item.name}
+                  count={item.value}
+                  color={item.color}
+                />
+              ))}
         </div>
 
-        {/* Charts Section */}
+        {/* Charts Section
         {!loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Bar Chart */}
+            
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">
                 Bar Chart Overview
@@ -145,7 +147,6 @@ export default function Page() {
               </ResponsiveContainer>
             </div>
 
-            {/* Pie Chart */}
             <div className="bg-white rounded-xl shadow p-6">
               <h2 className="text-xl font-semibold mb-4 text-gray-800">
                 Pie Chart Distribution
@@ -156,13 +157,8 @@ export default function Page() {
                     data={chartData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
                     outerRadius={100}
-                    fill="#8884d8"
                     dataKey="value"
-                    // label={({ name, percent }) =>
-                    //   `${name}: ${(percent * 100).toFixed(0)}%`
-                    // }
                   >
                     {chartData.map((entry, index) => (
                       <Cell
@@ -171,6 +167,7 @@ export default function Page() {
                       />
                     ))}
                   </Pie>
+
                   <Legend verticalAlign="bottom" />
                   <Tooltip
                     formatter={(value, name) => [`${value}`, `${name}`]}
@@ -179,30 +176,32 @@ export default function Page() {
               </ResponsiveContainer>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </SessionLayoutWrapper>
   );
 }
 
-// Stat Card
 function DashboardCard({ title, count, color }) {
   return (
-    <div
-      className={`rounded-xl p-5 shadow-md text-white transition-all ${color}`}
-    >
-      <h2 className="text-md font-medium">{title}</h2>
-      <p className="text-3xl font-bold">{count}</p>
+    <div className="rounded-xl p-5 shadow-sm border border-gray-200 bg-white">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-gray-600">{title}</h2>
+        {/* <span
+          className="inline-block w-3 h-3 rounded-full"
+          style={{ backgroundColor: TAILWIND_TO_HEX[color] }}
+        ></span> */}
+      </div>
+      <p className="text-2xl font-bold text-gray-800 mt-2">{count}</p>
     </div>
   );
 }
 
-// Skeleton Card
 function SkeletonCard() {
   return (
-    <div className="rounded-xl p-5 shadow-md animate-pulse bg-gray-300 h-[100px]">
-      <div className="h-4 w-1/3 bg-gray-400 rounded mb-4"></div>
-      <div className="h-8 w-1/2 bg-gray-500 rounded"></div>
+    <div className="rounded-xl p-5 shadow-sm border border-gray-200 bg-white animate-pulse">
+      <div className="h-3 w-1/3 bg-gray-200 rounded mb-3"></div>
+      <div className="h-6 w-1/2 bg-gray-300 rounded"></div>
     </div>
   );
 }

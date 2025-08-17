@@ -118,7 +118,7 @@ export default function AddEvents({ category }) {
     return (
         <div className="w-full mx-auto">
             <div className="flex items-center gap-3 mb-4">
-                <CalendarDays className="text-[#7f5af0]" size={28} />
+                <CalendarDays className="text-[#212178]" size={28} />
                 <h2 className="text-2xl font-bold text-[#1a1830]">Add New {category} Event</h2>
             </div>
 
@@ -313,7 +313,7 @@ export default function AddEvents({ category }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#7f5af0] text-white font-semibold py-3 rounded-md hover:bg-[#6e4be4] transition-all duration-200"
+                    className="w-full bg-[#212178] text-white font-semibold py-3 rounded-md hover:bg-[#6e4be4] transition-all duration-200"
                 >
                     {loading ? 'Submitting...' : 'Submit Event'}
                 </button>

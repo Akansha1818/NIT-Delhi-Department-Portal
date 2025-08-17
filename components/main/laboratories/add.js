@@ -240,7 +240,7 @@ export default function AddLabs() {
 
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
-                <FlaskConical className="text-[#7f5af0]" size={28} />
+                <FlaskConical className="text-[#212178]" size={28} />
                 <h2 className="text-2xl font-bold text-[#1a1830]">Add New Lab</h2>
             </div>
 
@@ -325,7 +325,7 @@ export default function AddLabs() {
                         )}
                     </div>
                 ))}
-                <button type="button" onClick={addHardware} className="text-[#7f5af0] flex items-center gap-2 font-medium">
+                <button type="button" onClick={addHardware} className="text-[#212178] flex items-center gap-2 font-medium">
                     <Plus size={18} /> Add Hardware
                 </button>
 
@@ -373,7 +373,7 @@ export default function AddLabs() {
                         )}
                     </div>
                 ))}
-                <button type="button" onClick={addSoftware} className="text-[#7f5af0] flex items-center gap-2 font-medium">
+                <button type="button" onClick={addSoftware} className="text-[#212178] flex items-center gap-2 font-medium">
                     <Plus size={18} /> Add Software
                 </button>
 
@@ -435,7 +435,7 @@ export default function AddLabs() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#7f5af0] text-white font-semibold py-3 rounded-md hover:bg-[#6e4be4] transition-all duration-200"
+                    className="w-full bg-[#212178] text-white font-semibold py-3 rounded-md hover:bg-[#6e4be4] transition-all duration-200"
                 >
                     {loading ? 'Submitting...' : 'Submit Lab'}
                 </button>
@@ -457,7 +457,7 @@ function InputField({ label, name, value, onChange, type = 'text', required = fa
                 value={value}
                 onChange={onChange}
                 required={required}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#7f5af0]"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#212178]"
             />
         </div>
     );
@@ -504,7 +504,7 @@ function DynamicPointList({ title, data, onChange, onAdd, onRemove, required = f
                 <button
                     type="button"
                     onClick={onAdd}
-                    className="mt-2 text-[#7f5af0] flex items-center gap-2 font-medium"
+                    className="mt-2 text-[#212178] flex items-center gap-2 font-medium"
                 >
                     <Plus size={18} /> Add Point
                 </button>
@@ -543,7 +543,7 @@ function DynamicTextareaList({ title, data, onChange, onAdd, onRemove, required 
                 <button
                     type="button"
                     onClick={onAdd}
-                    className="mt-2 text-[#7f5af0] flex items-center gap-2 font-medium"
+                    className="mt-2 text-[#212178] flex items-center gap-2 font-medium"
                 >
                     <Plus size={18} /> Add Point
                 </button>

@@ -9,8 +9,8 @@ export default function AddPrograms({ category }) {
     const [formData, setFormData] = useState({
         title: '',
         no_of_students: {
-            boys: '',
-            girls: '',
+            Male: '',
+            Female: '',
         },
         no_of_seats: {
             josaa: '',
@@ -76,8 +76,8 @@ export default function AddPrograms({ category }) {
             form.append('category', category);
 
             // Append nested fields
-            form.append('no_of_students[boys]', formData.no_of_students.boys);
-            form.append('no_of_students[girls]', formData.no_of_students.girls);
+            form.append('no_of_students[Male]', formData.no_of_students.Male);
+            form.append('no_of_students[Female]', formData.no_of_students.Female);
 
             form.append('no_of_seats[josaa]', formData.no_of_seats.josaa);
             form.append('no_of_seats[csab]', formData.no_of_seats.csab);
@@ -102,7 +102,7 @@ export default function AddPrograms({ category }) {
                 toast.success('Program added successfully!');
                 setFormData({
                     title: '',
-                    no_of_students: { boys: '', girls: '' },
+                    no_of_students: { Male: '', Female: '' },
                     no_of_seats: { josaa: '', csab: '', dasa: '' },
                     scheme: [{ title: '', url: '' }],
                     PSO: '',
@@ -146,26 +146,26 @@ export default function AddPrograms({ category }) {
                 <div className="grid grid-cols-2 gap-2">
                     <div>
                         <label className="block text-sm font-semibold mb-1 text-[#1a1830] items-center">
-                            Boys <span className="text-red-500">*</span>
+                            Male <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
-                            value={formData.no_of_students.boys}
-                            onChange={(e) => handleNestedChange('no_of_students', 'boys', Number(e.target.value))}
-                            placeholder="Number of Boys"
+                            value={formData.no_of_students.Male}
+                            onChange={(e) => handleNestedChange('no_of_students', 'Male', Number(e.target.value))}
+                            placeholder="Number of Male"
                             className="w-full p-2 border rounded"
                             required
                         />
                     </div>
                     <div>
                         <label className="block text-sm font-semibold mb-1 text-[#1a1830] items-center">
-                            Girls <span className="text-red-500">*</span>
+                            Female <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
-                            value={formData.no_of_students.girls}
-                            onChange={(e) => handleNestedChange('no_of_students', 'girls', Number(e.target.value))}
-                            placeholder="Number of Girls"
+                            value={formData.no_of_students.Female}
+                            onChange={(e) => handleNestedChange('no_of_students', 'Female', Number(e.target.value))}
+                            placeholder="Number of Female"
                             className="w-full p-2 border rounded"
                             required
                         />
@@ -272,7 +272,7 @@ export default function AddPrograms({ category }) {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-[#7f5af0] text-white py-3 rounded hover:bg-[#6e4be4]"
+                    className="w-full bg-[#212178] text-white py-3 rounded hover:bg-[#6e4be4]"
                 >
                     {loading ? 'Submitting...' : 'Submit Program'}
                 </button>

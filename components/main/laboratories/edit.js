@@ -533,7 +533,7 @@ export default function EditLabs() {
                                                 )}
                                             </div>
                                         ))}
-                                        <button type="button" onClick={addHardware} className="text-[#7f5af0] flex items-center gap-2 font-medium">
+                                        <button type="button" onClick={addHardware} className="text-[#212178] flex items-center gap-2 font-medium">
                                             <Plus size={18} /> Add Hardware
                                         </button>
 
@@ -581,7 +581,7 @@ export default function EditLabs() {
                                                 )}
                                             </div>
                                         ))}
-                                        <button type="button" onClick={addSoftware} className="text-[#7f5af0] flex items-center gap-2 font-medium">
+                                        <button type="button" onClick={addSoftware} className="text-[#212178] flex items-center gap-2 font-medium">
                                             <Plus size={18} /> Add Software
                                         </button>
 
@@ -717,7 +717,7 @@ function InputField({ label, icon, name, value, onChange, type = 'text', require
                 value={value}
                 onChange={onChange}
                 required={required}
-                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#7f5af0]"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#212178]"
             />
         </div>
     );
@@ -753,7 +753,7 @@ function DynamicPointList({ title, icon, data, onChange, onAdd, onRemove, requir
                 <button
                     type="button"
                     onClick={onAdd}
-                    className="mt-2 text-[#7f5af0] flex items-center gap-2 font-medium"
+                    className="mt-2 text-[#212178] flex items-center gap-2 font-medium"
                 >
                     <Plus size={18} /> Add Point
                 </button>
@@ -792,7 +792,7 @@ function DynamicTextareaList({ title, data, onChange, onAdd, onRemove, required 
                 <button
                     type="button"
                     onClick={onAdd}
-                    className="mt-2 text-[#7f5af0] flex items-center gap-2 font-medium"
+                    className="mt-2 text-[#212178] flex items-center gap-2 font-medium"
                 >
                     <Plus size={18} /> Add Point
                 </button>

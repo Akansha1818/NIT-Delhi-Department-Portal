@@ -73,7 +73,7 @@ export default function EditPrograms({ category }) {
         setEditedData({
             ...program,
             scheme: program.scheme || [],
-            no_of_students: program.no_of_students || { boys: 0, girls: 0 },
+            no_of_students: program.no_of_students || { Male: 0, Female: 0 },
             no_of_seats: program.no_of_seats || { josaa: 0, csab: 0, dasa: 0 },
         });
     };
@@ -221,15 +221,15 @@ export default function EditPrograms({ category }) {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                                 <div>
                                                     <label className="block text-sm font-semibold mb-1 text-[#1a1830]">
-                                                        Boys
+                                                        Male
                                                     </label>
                                                     <input
                                                         type="number"
-                                                        value={editedData.no_of_students.boys}
+                                                        value={editedData.no_of_students.Male}
                                                         onChange={(e) =>
                                                             handleNestedChange(
                                                                 "no_of_students",
-                                                                "boys",
+                                                                "Male",
                                                                 Number(e.target.value)
                                                             )
                                                         }
@@ -238,15 +238,15 @@ export default function EditPrograms({ category }) {
                                                 </div>
                                                 <div>
                                                     <label className="block text-sm font-semibold mb-1 text-[#1a1830]">
-                                                        Girls
+                                                        Female
                                                     </label>
                                                     <input
                                                         type="number"
-                                                        value={editedData.no_of_students.girls}
+                                                        value={editedData.no_of_students.Female}
                                                         onChange={(e) =>
                                                             handleNestedChange(
                                                                 "no_of_students",
-                                                                "girls",
+                                                                "Female",
                                                                 Number(e.target.value)
                                                             )
                                                         }
