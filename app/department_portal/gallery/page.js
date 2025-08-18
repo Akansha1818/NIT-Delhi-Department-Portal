@@ -10,6 +10,9 @@ import {
   Clock,
   Image as ImageIcon,
   X,
+  Folder,
+  ArrowLeft,
+  Images,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
@@ -47,7 +50,7 @@ const modalStyle = {
   height: "100%",
 };
 
-function AddGallery({ session }) {
+function AddGallery({ session, onUploadSuccess }) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -160,6 +163,7 @@ function AddGallery({ session }) {
         await Promise.all(uploadPromises);
         setSelectedFiles([]);
         setFormData({ eventName: "", eventDate: "", place: "", time: "" });
+        onUploadSuccess?.();
         resolve();
       } catch (error) {
         console.error("Upload error:", error);
@@ -255,12 +259,15 @@ function AddGallery({ session }) {
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <Upload className="w-10 h-10 text-gray-400 mx-auto mb-4" />
             <p className="text-lg font-medium text-gray-700 mb-2">
-              Drop your images here, or click to browse <span className="text-sm font-normal text-gray-600">(1920x1080px recommended)</span>
+              Drag or drop images <span className="text-sm font-normal text-gray-600">(1920x1080px recommended)</span>
             </p>
             <p className="text-sm text-gray-500 mb-6">
               Supports: JPG, JPEG, PNG, GIF (Max 10MB each)
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              First image will be used as the thumbnail
             </p>
 
             <button
@@ -324,6 +331,97 @@ function AddGallery({ session }) {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+function AlbumCard({ album, onOpenAlbum, onDeleteAlbum, session }) {
+  const { eventName, eventDate, place, time, photos, thumbnail } = album;
+  
+  return (
+    <div className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg hover:border-purple-300 transition-all duration-300">
+      {/* Album Actions */}
+      <div className="flex flex-row items-center justify-between p-2">
+        <div className="flex items-center text-gray-500">
+          <Folder className="w-5 h-5 mr-1" />
+          <span className="text-sm font-medium">{photos.length} photos</span>
+        </div>
+        
+        {session && (
+          <Tooltip>
+            <TooltipTrigger>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteAlbum(album);
+                }}
+                className="bg-red-100 hover:bg-red-200 rounded-full p-1 cursor-pointer"
+              >
+                <Trash2 size={16} className="text-red-600" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete this album</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Album Thumbnail */}
+      <div className="aspect-video bg-gray-100 overflow-hidden relative cursor-pointer" onClick={() => onOpenAlbum(album)}>
+        <img
+          src={thumbnail}
+          alt={eventName}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+          <div className="bg-white text-gray-900 px-4 py-2 rounded-full font-medium shadow-lg flex items-center gap-2">
+            <Images className="w-4 h-4" />
+            View Album
+          </div>
+        </div>
+        
+        {/* Photo count badge */}
+        <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+          {photos.length} photos
+        </div>
+      </div>
+      
+      {/* Album Info */}
+      <div className="p-4">
+        <h3 className="font-semibold text-gray-900 mb-3 text-lg">
+          {eventName}
+        </h3>
+
+        <div className="space-y-2 mb-4">
+          {eventDate && (
+            <div className="flex items-center text-sm text-gray-600">
+              <Calendar className="w-4 h-4 mr-2 text-[#212178]" />
+              {eventDate}
+            </div>
+          )}
+          {place && (
+            <div className="flex items-center text-sm text-gray-600">
+              <MapPin className="w-4 h-4 mr-2 text-green-500" />
+              {place}
+            </div>
+          )}
+          {time && (
+            <div className="flex items-center text-sm text-gray-600">
+              <Clock className="w-4 h-4 mr-2 text-orange-500" />
+              {time}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => onOpenAlbum(album)}
+          className="w-full bg-[#212178] text-white px-4 py-2 rounded-md hover:bg-[#212178]/90 transition-colors font-medium flex items-center justify-center gap-2"
+        >
+          <Images className="w-4 h-4" />
+          Open Album
+        </button>
+      </div>
     </div>
   );
 }
@@ -430,13 +528,236 @@ function SortableGalleryItem({ id, img, index, onRemove, onView, session }) {
     </div>
   );
 }
-function EditGallery({ session }) {
-  const [gallery, setGallery] = useState([]);
+
+function AlbumView({ album, onBack, session }) {
+  const [photos, setPhotos] = useState(album.photos);
   const [initialOrder, setInitialOrder] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
+
+  useEffect(() => {
+    setInitialOrder(photos.map((item) => item._id));
+  }, []);
+
+  const deleteImage = async (id) => {
+    if (!session) {
+      toast.error("You must be logged in to delete images!");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this image?")) return;
+
+    const deletePromise = new Promise(async (resolve, reject) => {
+      try {
+        const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Delete failed");
+        
+        setPhotos((prev) => prev.filter((img) => img._id !== id));
+        resolve();
+      } catch (error) {
+        console.error("Delete error:", error);
+        reject(error);
+      }
+    });
+
+    toast.promise(deletePromise, {
+      loading: "Deleting image...",
+      success: "Image deleted successfully!",
+      error: "Failed to delete image",
+    });
+  };
+
+  const handleDragEnd = (event) => {
+    if (!session) {
+      toast.error("You must be logged in to reorder images!");
+      return;
+    }
+
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = photos.findIndex((item) => item._id === active.id);
+    const newIndex = photos.findIndex((item) => item._id === over.id);
+
+    const newOrder = arrayMove(photos, oldIndex, newIndex).map((item, idx) => ({
+      ...item,
+      order: idx + 1,
+    }));
+
+    setPhotos(newOrder);
+  };
+
+  const handleUpdateOrder = async () => {
+    if (!session) {
+      toast.error("You must be logged in to update order!");
+      return;
+    }
+
+    try {
+      const payload = photos.map(({ _id, order }) => ({ _id, order }));
+      const res = await fetch("/api/gallery/reorder", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to update order");
+      
+      toast.success("Order updated successfully!");
+      setInitialOrder(photos.map((item) => item._id));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update order");
+    }
+  };
+
+  const isOrderChanged = () => {
+    return JSON.stringify(photos.map((item) => item._id)) !== JSON.stringify(initialOrder);
+  };
+
+  const handleOpen = (index) => {
+    setStartIndex(index);
+    setOpen(true);
+  };
+
+  const handleClose = () => setOpen(false);
+
+  const images = photos.map((item) => ({
+    original: item.url,
+    thumbnail: item.url,
+    description: `${item.eventDate} | ${item.place}`,
+  }));
+
+  return (
+    <div className="space-y-6">
+      {/* Album Header */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Albums
+        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-[#212178]">{album.eventName}</h2>
+          <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+            {album.eventDate && (
+              <div className="flex items-center gap-1">
+                <Calendar className="w-4 h-4" />
+                {album.eventDate}
+              </div>
+            )}
+            {album.place && (
+              <div className="flex items-center gap-1">
+                <MapPin className="w-4 h-4" />
+                {album.place}
+              </div>
+            )}
+            {album.time && (
+              <div className="flex items-center gap-1">
+                <Clock className="w-4 h-4" />
+                {album.time}
+              </div>
+            )}
+            <div className="flex items-center gap-1">
+              <Images className="w-4 h-4" />
+              {photos.length} photos
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Photos Grid */}
+      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext
+          items={photos.map((item) => item._id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {photos.map((img, index) => (
+              <SortableGalleryItem
+                key={img._id}
+                id={img._id}
+                img={img}
+                index={index}
+                onRemove={deleteImage}
+                onView={handleOpen}
+                session={session}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+
+      {session && isOrderChanged() && (
+        <button
+          onClick={handleUpdateOrder}
+          className="px-6 py-2 rounded bg-[#212178] text-white hover:bg-[#212178]/90 transition-colors font-medium"
+        >
+          Save Order
+        </button>
+      )}
+
+      <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <IconButton
+            sx={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              color: "#fff",
+              zIndex: 10,
+            }}
+            onClick={handleClose}
+          >
+            <CloseIcon />
+          </IconButton>
+          <ImageGallery
+            items={images}
+            startIndex={startIndex}
+            showThumbnails={true}
+            showFullscreenButton={false}
+            showPlayButton={false}
+          />
+        </Box>
+      </Modal>
+    </div>
+  );
+}
+
+function EditGallery({ session, refreshTrigger }) {
+  const [albums, setAlbums] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedAlbum, setSelectedAlbum] = useState(null);
   const hasShownToast = useRef(false);
+
+  // Group photos into albums
+  const groupPhotosIntoAlbums = (photos) => {
+    const grouped = photos.reduce((acc, photo) => {
+      // Create a unique key for each album based on event name and date
+      const albumKey = `${photo.eventName}-${photo.eventDate}`;
+      
+      if (!acc[albumKey]) {
+        acc[albumKey] = {
+          eventName: photo.eventName,
+          eventDate: photo.eventDate,
+          place: photo.place,
+          time: photo.time,
+          photos: [],
+          thumbnail: photo.url, // First photo becomes thumbnail
+        };
+      }
+      
+      acc[albumKey].photos.push(photo);
+      return acc;
+    }, {});
+
+    return Object.values(grouped).map(album => ({
+      ...album,
+      photos: album.photos.sort((a, b) => (a.order || 0) - (b.order || 0))
+    }));
+  };
 
   const fetchGallery = async () => {
     setLoading(true);
@@ -457,10 +778,10 @@ function EditGallery({ session }) {
         }))
         .sort((a, b) => a.order - b.order);
       
-      setGallery(sortedData);
-      setInitialOrder(sortedData.map((item) => item._id));
+      const albumsData = groupPhotosIntoAlbums(sortedData);
+      setAlbums(albumsData);
       
-      if (!hasShownToast.current) {
+      if (!hasShownToast.current && albumsData.length > 0) {
         toast.success("Gallery loaded successfully!");
         hasShownToast.current = true;
       }
@@ -487,22 +808,35 @@ function EditGallery({ session }) {
 
   useEffect(() => {
     fetchGallery();
-  }, [session]);
+  }, [session, refreshTrigger]);
 
-  const deleteImage = async (id) => {
+  const deleteAlbum = async (album) => {
     if (!session) {
-      toast.error("You must be logged in to delete images!");
+      toast.error("You must be logged in to delete albums!");
       return;
     }
 
-    if (!confirm("Are you sure you want to delete this image?")) return;
+    if (!confirm(`Are you sure you want to delete the album "${album.eventName}" with ${album.photos.length} photos?`)) return;
 
     const deletePromise = new Promise(async (resolve, reject) => {
       try {
-        const res = await fetch(`/api/gallery/${id}`, { method: "DELETE" });
-        if (!res.ok) throw new Error("Delete failed");
+        // Delete all photos in the album
+        const deletePromises = album.photos.map(photo => 
+          fetch(`/api/gallery/${photo._id}`, { method: "DELETE" })
+        );
         
-        setGallery((prev) => prev.filter((img) => img._id !== id));
+        const results = await Promise.all(deletePromises);
+        
+        // Check if all deletions were successful
+        for (const res of results) {
+          if (!res.ok) throw new Error("Failed to delete some photos");
+        }
+        
+        // Remove album from state
+        setAlbums(prev => prev.filter(a => 
+          !(a.eventName === album.eventName && a.eventDate === album.eventDate)
+        ));
+        
         resolve();
       } catch (error) {
         console.error("Delete error:", error);
@@ -511,182 +845,193 @@ function EditGallery({ session }) {
     });
 
     toast.promise(deletePromise, {
-      loading: "Deleting image...",
-      success: "Image deleted successfully!",
-      error: "Failed to delete image",
+      loading: "Deleting album...",
+      success: "Album deleted successfully!",
+      error: "Failed to delete album",
     });
   };
 
-  const handleDragEnd = (event) => {
-    if (!session) {
-      toast.error("You must be logged in to reorder images!");
-      return;
-    }
-
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const oldIndex = gallery.findIndex((item) => item._id === active.id);
-    const newIndex = gallery.findIndex((item) => item._id === over.id);
-
-    const newOrder = arrayMove(gallery, oldIndex, newIndex).map((item, idx) => ({
-      ...item,
-      order: idx + 1,
-    }));
-
-    setGallery(newOrder);
+  const openAlbum = (album) => {
+    setSelectedAlbum(album);
   };
 
-  const handleUpdateOrder = async () => {
-    if (!session) {
-      toast.error("You must be logged in to update order!");
-      return;
-    }
-
-    try {
-      const payload = gallery.map(({ _id, order }) => ({ _id, order }));
-      const res = await fetch("/api/gallery/reorder", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error("Failed to update order");
-      
-      toast.success("Order updated successfully!");
-      setInitialOrder(gallery.map((item) => item._id));
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update order");
-    }
+  const closeAlbum = () => {
+    setSelectedAlbum(null);
   };
 
-  const isOrderChanged = () => {
-    return JSON.stringify(gallery.map((item) => item._id)) !== JSON.stringify(initialOrder);
-  };
-
-  function SkeletonCard() {
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden animate-pulse">
-        {/* Image placeholder */}
-        <div className="aspect-video bg-gray-300"></div>
-        
-        {/* Content area */}
-        <div className="p-4 space-y-3">
-          {/* Event name placeholder */}
-          <div className="h-6 bg-gray-300 rounded w-3/4"></div>
-          
-          {/* Event details placeholders */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-            </div>
-            <div className="flex items-center">
-              <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
-              <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-            </div>
-          </div>
-          
-          {/* Delete button placeholder */}
-          <div className="h-10 bg-gray-300 rounded-md w-full"></div>
-        </div>
-      </div>
-    );
-  }
-
-  const handleOpen = (index) => {
-    setStartIndex(index);
-    setOpen(true);
-  };
-
-  const handleClose = () => setOpen(false);
-
-  const images = gallery.map((item) => ({
-    original: item.url,
-    thumbnail: item.url,
-    description: `${item.eventDate} | ${item.place}`,
-  }));
-
+function SkeletonCard() {
   return (
-    <div className="space-y-6">
-      {(!session || loading) ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <SkeletonCard key={i} />
-          ))}
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden animate-pulse">
+      {/* Header actions placeholder */}
+      <div className="flex flex-row items-center justify-between p-2">
+        <div className="flex items-center">
+          <div className="w-5 h-5 bg-gray-300 rounded mr-1"></div>
+          <div className="h-4 bg-gray-300 rounded w-16"></div>
         </div>
-      ) : gallery.length === 0 ? (
-        <div className="text-center py-12">
-          <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-gray-500 text-lg">No images uploaded yet</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Switch to "Add Images" tab to upload your first images
-          </p>
+        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+      </div>
+
+      {/* Image placeholder */}
+      <div className="aspect-video bg-gray-300"></div>
+      
+      {/* Content area */}
+      <div className="p-4 space-y-3">
+        {/* Event name placeholder */}
+        <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+        
+        {/* Event details placeholders */}
+        <div className="space-y-2">
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-4 bg-gray-300 rounded mr-2"></div>
+            <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+          </div>
         </div>
-      ) : (
-        <>
-          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext
-              items={gallery.map((item) => item._id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {gallery.map((img, index) => (
-                  <SortableGalleryItem
-                    key={img._id}
-                    id={img._id}
-                    img={img}
-                    index={index}
-                    onRemove={deleteImage}
-                    onView={handleOpen}
-                    session={session}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
-
-          {session && isOrderChanged() && (
-            <button
-              onClick={handleUpdateOrder}
-              className="mt-4 px-6 py-2 rounded bg-[#212178] text-white hover:bg-[#212178] transition-colors font-medium"
-            >
-              Save Order
-            </button>
-          )}
-
-          <Modal open={open} onClose={handleClose}>
-            <Box sx={modalStyle}>
-              <IconButton
-                sx={{
-                  position: "absolute",
-                  top: 10,
-                  right: 10,
-                  color: "#fff",
-                  zIndex: 10,
-                }}
-                onClick={handleClose}
-              >
-                <CloseIcon />
-              </IconButton>
-              <ImageGallery
-                items={images}
-                startIndex={startIndex}
-                showThumbnails={true}
-                showFullscreenButton={false}
-                showPlayButton={false}
-              />
-            </Box>
-          </Modal>
-        </>
-      )}
+        
+        {/* Button placeholder */}
+        <div className="h-10 bg-gray-300 rounded-md w-full"></div>
+      </div>
     </div>
   );
+}
+
+return (
+  <div className="space-y-6">
+    {selectedAlbum ? (
+      <AlbumView 
+        album={selectedAlbum} 
+        onBack={closeAlbum} 
+        session={session} 
+      />
+    ) : (
+      <>
+        {(!session || loading) ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : albums.length === 0 ? (
+          <div className="text-center py-12">
+            <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No albums found</p>
+            <p className="text-sm text-gray-400 mt-2">
+              Switch to "Add Images" tab to upload your first images
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {albums.map((album, index) => (
+              <AlbumCard
+                key={`${album.eventName}-${album.eventDate}`}
+                album={album}
+                onOpenAlbum={openAlbum}
+                onDeleteAlbum={deleteAlbum}
+                session={session}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    )}
+  </div>
+);
+
+  // const handleOpen = (index) => {
+  //   setStartIndex(index);
+  //   setOpen(true);
+  // };
+
+  // const handleClose = () => setOpen(false);
+
+  // const images = gallery.map((item) => ({
+  //   original: item.url,
+  //   thumbnail: item.url,
+  //   description: `${item.eventDate} | ${item.place}`,
+  // }));
+
+  // return (
+  //   <div className="space-y-6">
+  //     {(!session || loading) ? (
+  //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  //         {Array.from({ length: 6 }).map((_, i) => (
+  //           <SkeletonCard key={i} />
+  //         ))}
+  //       </div>
+  //     ) : gallery.length === 0 ? (
+  //       <div className="text-center py-12">
+  //         <ImageIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+  //         <p className="text-gray-500 text-lg">No images uploaded yet</p>
+  //         <p className="text-sm text-gray-400 mt-2">
+  //           Switch to "Add Images" tab to upload your first images
+  //         </p>
+  //       </div>
+  //     ) : (
+  //       <>
+  //         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+  //           <SortableContext
+  //             items={gallery.map((item) => item._id)}
+  //             strategy={verticalListSortingStrategy}
+  //           >
+  //             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  //               {gallery.map((img, index) => (
+  //                 <SortableGalleryItem
+  //                   key={img._id}
+  //                   id={img._id}
+  //                   img={img}
+  //                   index={index}
+  //                   onRemove={deleteImage}
+  //                   onView={handleOpen}
+  //                   session={session}
+  //                 />
+  //               ))}
+  //             </div>
+  //           </SortableContext>
+  //         </DndContext>
+
+  //         {session && isOrderChanged() && (
+  //           <button
+  //             onClick={handleUpdateOrder}
+  //             className="mt-4 px-6 py-2 rounded bg-[#212178] text-white hover:bg-[#212178] transition-colors font-medium"
+  //           >
+  //             Save Order
+  //           </button>
+  //         )}
+
+  //         <Modal open={open} onClose={handleClose}>
+  //           <Box sx={modalStyle}>
+  //             <IconButton
+  //               sx={{
+  //                 position: "absolute",
+  //                 top: 10,
+  //                 right: 10,
+  //                 color: "#fff",
+  //                 zIndex: 10,
+  //               }}
+  //               onClick={handleClose}
+  //             >
+  //               <CloseIcon />
+  //             </IconButton>
+  //             <ImageGallery
+  //               items={images}
+  //               startIndex={startIndex}
+  //               showThumbnails={true}
+  //               showFullscreenButton={false}
+  //               showPlayButton={false}
+  //             />
+  //           </Box>
+  //         </Modal>
+  //       </>
+  //     )}
+  //   </div>
+  // );
 }
 
 export default function GalleryPage() {
