@@ -2,9 +2,8 @@ import connectDB from "@/lib/db";
 import { getDbAndAboutModel } from "@/lib/getDbModel";
 import { NextResponse } from "next/server";
 
-
 const corsHeaders = {
-    'Access-Control-Allow-Origin': 'http://localhost:3001',
+    'Access-Control-Allow-Origin': process.env.ALLOWED_ORIGINS?.split(",").join(","),
     'Access-Control-Allow-Methods': 'GET, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, x-department',
 };
